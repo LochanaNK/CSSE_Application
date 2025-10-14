@@ -1,4 +1,5 @@
 import React from "react";
+import { dashboardChartData, dashboardStats, recentActivity } from "../data/dashboardData";
 import {
   BarChart,
   Bar,
@@ -17,12 +18,7 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
-  const data = [
-    { month: "Jun", waste: 12 },
-    { month: "Jul", waste: 18 },
-    { month: "Aug", waste: 16 },
-    { month: "Sep", waste: 22 },
-  ];
+  const data = dashboardChartData;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -36,40 +32,40 @@ export default function Dashboard() {
             <div className="bg-green-100 p-3 rounded-full text-green-600">
               <ArrowUp />
             </div>
-            <div>
-              <p className="text-sm text-gray-500">Total Waste</p>
-              <h3 className="text-xl font-bold">15.2 kg</h3>
-            </div>
+              <div>
+                <p className="text-sm text-gray-500">Total Waste</p>
+                <h3 className="text-xl font-bold">{dashboardStats.totalWaste}</h3>
+              </div>
           </div>
 
           <div className="flex items-center gap-4 bg-white p-4 rounded-xl shadow-sm">
             <div className="bg-blue-100 p-3 rounded-full text-blue-600">
               <Clock />
             </div>
-            <div>
-              <p className="text-sm text-gray-500">Last Collection</p>
-              <h3 className="text-xl font-bold">2 days</h3>
-            </div>
+              <div>
+                <p className="text-sm text-gray-500">Last Collection</p>
+                <h3 className="text-xl font-bold">{dashboardStats.lastCollection}</h3>
+              </div>
           </div>
 
           <div className="flex items-center gap-4 bg-white p-4 rounded-xl shadow-sm">
             <div className="bg-green-100 p-3 rounded-full text-green-600">
               <DollarSign />
             </div>
-            <div>
-              <p className="text-sm text-gray-500">Balance</p>
-              <h3 className="text-xl font-bold">$45.30</h3>
-            </div>
+              <div>
+                <p className="text-sm text-gray-500">Balance</p>
+                <h3 className="text-xl font-bold">{dashboardStats.balance}</h3>
+              </div>
           </div>
 
           <div className="flex items-center gap-4 bg-white p-4 rounded-xl shadow-sm">
             <div className="bg-orange-100 p-3 rounded-full text-orange-600">
               <Calendar />
             </div>
-            <div>
-              <p className="text-sm text-gray-500">Next Collection</p>
-              <h3 className="text-xl font-bold">Tomorrow</h3>
-            </div>
+              <div>
+                <p className="text-sm text-gray-500">Next Collection</p>
+                <h3 className="text-xl font-bold">{dashboardStats.nextCollection}</h3>
+              </div>
           </div>
         </aside>
 
@@ -121,18 +117,13 @@ export default function Dashboard() {
           <div>
             <h3 className="font-semibold mb-3">Recent Activity</h3>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-center gap-2 text-green-600">
-                <CheckCircle size={16} /> Waste collected{" "}
-                <span className="text-gray-400 ml-auto">2h ago</span>
-              </li>
-              <li className="flex items-center gap-2 text-blue-600">
-                <DollarSign size={16} /> Payment received{" "}
-                <span className="text-gray-400 ml-auto">1d ago</span>
-              </li>
-              <li className="flex items-center gap-2 text-orange-600">
-                <Calendar size={16} /> Collection scheduled{" "}
-                <span className="text-gray-400 ml-auto">2d ago</span>
-              </li>
+              {recentActivity.map((a, i) => (
+                <li key={i} className={`flex items-center gap-2 ${a.type === "success" ? "text-green-600" : a.type === "payment" ? "text-blue-600" : "text-orange-600"}`}>
+                  {a.type === "success" ? <CheckCircle size={16} /> : a.type === "payment" ? <DollarSign size={16} /> : <Calendar size={16} />}
+                  {a.label}
+                  <span className="text-gray-400 ml-auto">{a.time}</span>
+                </li>
+              ))}
             </ul>
           </div>
 
