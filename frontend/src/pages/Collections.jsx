@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Calendar as CalendarIcon, Clock, MapPin, Filter, X, PlusCircle, Upload, DollarSign, TrendingUp } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, MapPin, Filter, X, PlusCircle, Upload, DollarSign, TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { getInitialSchedules } from "../data/collectionsData";
 
 export default function Collections() {
@@ -171,9 +171,18 @@ export default function Collections() {
                 <div className="text-sm text-gray-500">Month</div>
               </div>
               <div className="flex items-center gap-2">
-                <button className="px-3 py-1 text-gray-700" onClick={() => setCurrentMonth(new Date(year, currentMonth.getMonth() - 1, 1))}>Prev</button>
-                <button className="px-3 py-1 rounded-full bg-green-600 text-white" onClick={() => setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1))}>Today</button>
-                <button className="px-3 py-1 text-gray-700" onClick={() => setCurrentMonth(new Date(year, currentMonth.getMonth() + 1, 1))}>Next</button>
+                <button 
+                  className="p-2 rounded-full hover:bg-gray-100 text-gray-600 hover:text-gray-800" 
+                  onClick={() => setCurrentMonth(new Date(year, currentMonth.getMonth() - 1, 1))}
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button 
+                  className="p-2 rounded-full hover:bg-gray-100 text-gray-600 hover:text-gray-800" 
+                  onClick={() => setCurrentMonth(new Date(year, currentMonth.getMonth() + 1, 1))}
+                >
+                  <ChevronRight size={20} />
+                </button>
               </div>
             </div>
 

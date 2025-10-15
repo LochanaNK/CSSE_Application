@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export default function Navbar() {
+  const location = useLocation();
   return (
     <nav className="bg-white shadow-md px-8 py-4 flex justify-between items-center ">
       {/* 🌿 Logo */}
@@ -12,31 +13,51 @@ export default function Navbar() {
       <div className="flex gap-6">
         <Link
           to="/dashboard"
-          className="text-green-700 font-medium border-b-2 border-green-600 pb-1"
+          className={`font-medium pb-1 ${
+            location.pathname === "/dashboard" 
+              ? "text-green-700 border-b-2 border-green-600" 
+              : "text-gray-700 hover:text-green-600"
+          }`}
         >
           Dashboard
         </Link>
         <Link
           to="/waste-history"
-          className="text-gray-700 hover:text-green-600 font-medium"
+          className={`font-medium pb-1 ${
+            location.pathname === "/waste-history" 
+              ? "text-green-700 border-b-2 border-green-600" 
+              : "text-gray-700 hover:text-green-600"
+          }`}
         >
           Waste History
         </Link>
         <Link
           to="/collections"
-          className="text-gray-700 hover:text-green-600 font-medium"
+          className={`font-medium pb-1 ${
+            location.pathname === "/collections" 
+              ? "text-green-700 border-b-2 border-green-600" 
+              : "text-gray-700 hover:text-green-600"
+          }`}
         >
           Collections
         </Link>
         <Link
           to="/payments"
-          className="text-gray-700 hover:text-green-600 font-medium"
+          className={`font-medium pb-1 ${
+            location.pathname === "/payments" 
+              ? "text-green-700 border-b-2 border-green-600" 
+              : "text-gray-700 hover:text-green-600"
+          }`}
         >
           Payments
         </Link>
         <Link
           to="/settings"
-          className="text-gray-700 hover:text-green-600 font-medium"
+          className={`font-medium pb-1 ${
+            location.pathname === "/settings" 
+              ? "text-green-700 border-b-2 border-green-600" 
+              : "text-gray-700 hover:text-green-600"
+          }`}
         >
           Settings
         </Link>
