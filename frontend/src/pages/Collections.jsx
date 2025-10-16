@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Calendar as CalendarIcon, Clock, MapPin, Filter, X, PlusCircle, Upload, DollarSign, TrendingUp } from "lucide-react";
-import { getInitialSchedules } from "../data/collectionsData";
+import { loadSchedules, saveSchedules, addSchedule as addScheduleToStore, removeScheduleById } from "../data/collectionsData";
+import RouteMap from '../components/RouteMap';
 
 export default function Collections() {
   const today = new Date();
@@ -9,7 +10,7 @@ export default function Collections() {
   const [selectedDay, setSelectedDay] = useState(null);
 
   // Schedules state
-  const [schedules, setSchedules] = useState(getInitialSchedules(today));
+  const [schedules, setSchedules] = useState(() => loadSchedules());
 
   // New schedule form state
   const [newType, setNewType] = useState("recycling");
@@ -33,13 +34,28 @@ export default function Collections() {
     else d.setHours(hNum, mNum);
 
     const id = `s-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    setSchedules((prev) => [...prev, { id, date: d, type: newType, time: newTime, status: "Scheduled" }]);
+    const next = [...schedules, { id, date: d, type: newType, time: newTime, status: "Scheduled", location: "Default" }];
+    setSchedules(next);
+    saveSchedules(next);
     setNewDate("");
     setNewTime("");
   }
 
   function cancelSchedule(id) {
-    setSchedules((prev) => prev.filter((s) => s.id !== id));
+    // if authenticated, delete from backend
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch((import.meta.env.VITE_API_URL || 'http://127.0.0.1:3000') + `/api/schedules/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+        .then(res => {
+          if (!res.ok) throw new Error('Delete failed');
+          const next = schedules.filter((s) => s.id !== id);
+          setSchedules(next);
+        }).catch(err => console.error(err));
+    } else {
+      const next = schedules.filter((s) => s.id !== id);
+      setSchedules(next);
+      saveSchedules(next);
+    }
     setSelectedDay((prev) => {
       if (!prev) return prev;
       const remaining = prev.events.filter((e) => e.id !== id);
@@ -61,13 +77,40 @@ export default function Collections() {
     else d.setHours(hNum, mNum);
 
     const id = `s-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    setSchedules((prev) => [
-      ...prev,
-      { id, date: d, type: "special", time: t, status: "Scheduled", meta: { item: specialItem } },
-    ]);
+    const token = localStorage.getItem('token');
+    const payload = { type: 'special', scheduled_at: d.toISOString(), time_label: t, meta: { item: specialItem }, location: null };
+    if (token) {
+      fetch((import.meta.env.VITE_API_URL || 'http://127.0.0.1:3000') + '/api/schedules', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
+        .then(res => res.json()).then(() => {
+          // refresh schedules from backend
+          loadRemote();
+        }).catch(err => console.error(err));
+    } else {
+      const next = [...schedules, { id, date: d, type: "special", time: t, status: "Scheduled", meta: { item: specialItem }, location: 'Default' }];
+      setSchedules(next);
+      saveSchedules(next);
+    }
     setSpecialDate("");
     setSpecialTime("");
   }
+
+  async function loadRemote() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      const res = await fetch((import.meta.env.VITE_API_URL || 'http://127.0.0.1:3000') + '/api/schedules', { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error('Failed to load');
+      const items = await res.json();
+      // convert date strings to Date
+      const converted = items.map(i => ({ id: i.id, date: new Date(i.date), type: i.type, time: i.time || i.time_label || '', status: i.status, location: i.location }));
+      setSchedules(converted);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // on mount, if authenticated fetch remote schedules
+  React.useEffect(() => { if (localStorage.getItem('token')) loadRemote(); }, []);
 
   const daysInView = useMemo(() => {
     const start = new Date(currentMonth);
@@ -223,8 +266,11 @@ export default function Collections() {
 
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h3 className="font-semibold mb-2">Today's Route</h3>
-            <div className="h-40 rounded-lg border grid place-items-center text-gray-400">
-              Interactive route map
+            <div className="h-64 rounded-lg border p-2">
+              <RouteMap events={schedules.filter(s => {
+                const today = new Date();
+                return s.date.getFullYear() === today.getFullYear() && s.date.getMonth() === today.getMonth() && s.date.getDate() === today.getDate();
+              })} />
             </div>
           </div>
         </main>
