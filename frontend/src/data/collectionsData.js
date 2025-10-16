@@ -1,12 +1,52 @@
-export function getInitialSchedules(baseDate = new Date()) {
-  const y = baseDate.getFullYear();
-  const m = baseDate.getMonth();
-  return [
-    { id: "s1", date: new Date(y, m, 3), type: "recycling", time: "8:00 AM", status: "Confirmed" },
-    { id: "s2", date: new Date(y, m, 10), type: "general", time: "9:30 AM", status: "Scheduled" },
-    { id: "s3", date: new Date(y, m, 15), type: "recycling", time: "8:15 AM", status: "Confirmed" },
-    { id: "s4", date: new Date(y, m, 18), type: "general", time: "9:30 AM", status: "Scheduled" },
-  ];
+const STORAGE_KEY = 'csse_schedules_v1';
+
+export function getSeedSchedules(baseDate = new Date()) {
+  return [];
+}
+
+function reviver(key, value) {
+  if (key === 'date') return new Date(value);
+  return value;
+}
+
+export function loadSchedules() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      const seeds = getSeedSchedules(new Date());
+      saveSchedules(seeds);
+      return seeds;
+    }
+    const parsed = JSON.parse(raw);
+    // convert date strings to Date
+    return parsed.map(s => ({ ...s, date: new Date(s.date) }));
+  } catch (e) {
+    console.error('Failed to load schedules', e);
+    return getSeedSchedules(new Date());
+  }
+}
+
+export function saveSchedules(schedules) {
+  try {
+    const toStore = schedules.map(s => ({ ...s, date: s.date instanceof Date ? s.date.toISOString() : s.date }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+  } catch (e) {
+    console.error('Failed to save schedules', e);
+  }
+}
+
+export function addSchedule(schedule) {
+  const list = loadSchedules();
+  const next = [...list, schedule];
+  saveSchedules(next);
+  return next;
+}
+
+export function removeScheduleById(id) {
+  const list = loadSchedules();
+  const next = list.filter(s => s.id !== id);
+  saveSchedules(next);
+  return next;
 }
 
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { dashboardChartData, dashboardStats, recentActivity } from "../data/dashboardData";
 import {
   BarChart,
@@ -16,9 +16,11 @@ import {
   Clock,
   CheckCircle,
 } from "lucide-react";
+import ScheduleModal from '../components/ScheduleModal';
 
 export default function Dashboard() {
   const data = dashboardChartData;
+  const [showSchedule, setShowSchedule] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -129,8 +131,8 @@ export default function Dashboard() {
 
           <div>
             <h3 className="font-semibold mb-3">Quick Actions</h3>
-            <div className="flex flex-col gap-2">
-              <button className="bg-green-600 text-white py-2 rounded-lg">
+              <div className="flex flex-col gap-2">
+              <button onClick={() => setShowSchedule(true)} className="bg-green-600 text-white py-2 rounded-lg">
                 + Schedule Collection
               </button>
               <button className="bg-green-500 text-white py-2 rounded-lg">
@@ -148,6 +150,7 @@ export default function Dashboard() {
       <footer className="text-center text-gray-400 py-4 text-sm border-t bg-white">
         © 2025 EcoTrack
       </footer>
+      {showSchedule && <ScheduleModal onClose={() => setShowSchedule(false)} onAdded={() => { /* Collections reads storage */ }} />}
     </div>
   );
 }
